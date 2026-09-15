@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+dist/
+build/
+
+# Node
+node_modules/
+annotator/web/dist/
+
+# 数据与模型（不入库，仅本地）
+*.zip
+*.onnx
+*.param
+*.bin
+*.tflite
+demo/neu_det/dataset/
+demo/neu_det/calib_*/
+
+# 系统
+.DS_Store
+Thumbs.db

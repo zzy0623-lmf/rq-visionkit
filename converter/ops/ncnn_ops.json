@@ -1,0 +1,5 @@
+{
+  "_note": "NCNN 支持算子清单。当前为占位骨架，T1.5 按 NCNN 官方文档整理并注明来源版本。",
+  "ncnn_version_source": null,
+  "ops": []
+}
