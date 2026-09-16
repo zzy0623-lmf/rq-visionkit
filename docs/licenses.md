@@ -7,15 +7,16 @@
 
 | 依赖 | 版本 | 许可证 | 用途 | 状态 |
 |---|---|---|---|---|
-| pytest | — | MIT | 测试框架（CI） | ✅ |
+| pytest | 9.1.1 | MIT | 测试框架（CI） | ✅ |
+| ncnn / ncnn-python | 1.0.20260526 | BSD-3-Clause | PC 仿真推理框架 | ✅ |
+| opencv-python | 5.0.0 | MIT（封装层；OpenCV 4.x 核心为 Apache-2.0） | 图像读写/预处理 | ✅ |
+| numpy | 2.2.6 | BSD-3-Clause | 数值计算 | ✅ |
+| portalocker | 4.3.2 | BSD-3-Clause | ncnn 传递依赖（文件锁） | ✅（传递） |
 | fastapi | — | MIT | M1/M3 后端框架 | 📌 |
 | uvicorn | — | BSD-3-Clause | ASGI 服务器 | 📌 |
 | onnx | — | Apache-2.0 | 模型图解析/转换 | 📌 |
 | onnxsim (onnx-simplifier) | — | MIT | ONNX 图简化 | 📌 |
-| ncnn / ncnn-python | — | BSD-3-Clause | PC 仿真推理框架 | 📌 |
 | pyyaml | — | MIT | 配置文件解析 | 📌 |
-| opencv-python | — | MIT（封装层；OpenCV 4.x 核心为 Apache-2.0） | 图像读写/预处理 | 📌 |
-| numpy | — | BSD-3-Clause | 数值计算 | 📌 |
 | paramiko | — | **LGPL-2.1-or-later** | SSH 下发部署包（T2.3） | ⚠️ 见下方决策 |
 
 ## 前端依赖（T1.2 起）
@@ -32,6 +33,14 @@
 | YOLOX | Apache-2.0 | 主 Demo 检测模型训练默认选型 | 📌 |
 | Ultralytics YOLO | AGPL-3.0 | **默认不使用**；若使用须在此声明并给出理由 | ❌ 规避 |
 | NCNN 命令行工具（onnx2ncnn / pnnx / ncnn2int8） | BSD-3-Clause | M2 转换流水线 | 📌 |
+
+## 测试用资产（不入库，scripts/assets/）
+
+| 资产 | 来源 | 说明 |
+|---|---|---|
+| squeezenet_v1.1.param/.bin | github.com/nihui/ncnn-assets（Tencent NCNN 官方资产仓库） | T0.2 冒烟模型 |
+| synset_words.txt | github.com/Tencent/ncnn examples/ | ImageNet 1000 类标签 |
+| messi5.jpg | github.com/opencv/opencv samples/data/ | T0.2 测试图片 |
 
 ## 数据集
 

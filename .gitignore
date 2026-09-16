@@ -20,6 +20,7 @@ annotator/web/dist/
 *.tflite
 demo/neu_det/dataset/
 demo/neu_det/calib_*/
+scripts/assets/
 
 # 系统
 .DS_Store
