@@ -46,7 +46,7 @@
 
 | 数据集 | 来源 | 使用条款 | 状态 |
 |---|---|---|---|
-| NEU-DET（东北大学钢材表面缺陷数据集） | T0.3 时登记具体来源链接 | 学术研究用途，T0.3 核实并补充 | 📌 T0.3 完成登记 |
+| NEU-DET（东北大学钢材表面缺陷数据集） | 官方页：faculty.neu.edu.cn/songkechen（直链 Google Drive/百度网盘）；本仓库经 GitHub 镜像 siddhartamukherjee/NEU-DET-Steel-Surface-Defect-Detection 获取完整 1800 张 | 无显式许可证；作者注明供学术研究使用并要求引用其论文。本项目仅非商业竞赛/研究用途，**数据集本体不入库、不再分发**，详见 demo/neu_det/README.md | ✅ |
 
 ## ⚠️ 待决策：paramiko 许可证冲突
 
