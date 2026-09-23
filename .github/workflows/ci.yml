@@ -14,9 +14,9 @@ jobs:
         with:
           python-version: "3.10"
       - name: Install test dependencies
-        run: pip install pytest
+        run: pip install pytest fastapi "uvicorn[standard]" python-multipart httpx numpy opencv-python
       - name: Run pytest
-        run: pytest tests/ -v
+        run: pytest tests/ annotator/tests/ converter/tests/ -v
 
   frontend:
     name: Frontend build check
