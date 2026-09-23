@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rq-visionkit-converter"
+version = "0.1.0"
+description = "RQ-VisionKit M2 模型转换器：ONNX → NCNN（FP32/INT8）一键转换"
+requires-python = ">=3.10"
+dependencies = [
+    "onnx",
+    "onnxsim",
+    "numpy",
+]
+
+[project.scripts]
+rq-convert = "rq_convert.cli:main"
+rq-scan = "rq_convert.scan:main"
+rq-export-keras = "rq_convert.keras_export:main"
+
+[tool.setuptools]
+packages = ["rq_convert"]

@@ -1,5 +1,61 @@
 {
-  "_note": "NCNN 支持算子清单。当前为占位骨架，T1.5 按 NCNN 官方文档整理并注明来源版本。",
-  "ncnn_version_source": null,
-  "ops": []
+  "ncnn_version": "20260526",
+  "source": "https://github.com/Tencent/ncnn/tree/master/src/layer（110 个 layer 类型，小写为源码文件名/算子名）",
+  "note": "扫描器对照规则：① op_type 命中 onnx_supported → ✅ 直接支持；② op_type.lower() 命中 layers → ✅ 同名支持；③ op_type 命中 onnx_replace → ⚠️ 需替换；④ 其余 → ❌ 不支持。",
+  "layers": [
+    "absval", "argmax", "batchnorm", "bias", "binaryop", "bnll", "cast", "celu", "clip",
+    "concat", "convolution", "convolution1d", "convolution3d", "convolutiondepthwise",
+    "convolutiondepthwise1d", "convolutiondepthwise3d", "copyto", "crop", "cumulativesum",
+    "deconvolution", "deconvolution1d", "deconvolution3d", "deconvolutiondepthwise",
+    "deconvolutiondepthwise1d", "deconvolutiondepthwise3d", "deepcopy", "deformableconv2d",
+    "dequantize", "detectionoutput", "diag", "dropout", "einsum", "eltwise", "elu", "embed",
+    "erf", "exp", "expanddims", "flatten", "flip", "fold", "gelu", "gemm", "glu", "gridsample",
+    "groupnorm", "gru", "hardsigmoid", "hardswish", "innerproduct", "input", "instancenorm",
+    "interp", "inversespectrogram", "layernorm", "log", "lrn", "lstm", "matmul", "memorydata",
+    "mish", "multiheadattention", "mvn", "noop", "normalize", "packing", "padding", "permute",
+    "pixelshuffle", "pooling", "pooling1d", "pooling3d", "power", "prelu", "priorbox",
+    "proposal", "psroipooling", "quantize", "reduction", "relu", "reorg", "requantize",
+    "reshape", "rmsnorm", "rnn", "roialign", "roipooling", "rotaryembed", "scale", "sdpa",
+    "selu", "shrink", "shufflechannel", "sigmoid", "slice", "softmax", "softplus",
+    "spectrogram", "split", "spp", "squeeze", "statisticspooling", "swish", "tanh",
+    "threshold", "tile", "unaryop", "unfold", "yolodetectionoutput", "yolov3detectionoutput"
+  ],
+  "onnx_supported": {
+    "Conv": "Convolution",
+    "ConvTranspose": "Deconvolution",
+    "BatchNormalization": "BatchNorm",
+    "InstanceNormalization": "InstanceNorm",
+    "LayerNormalization": "LayerNorm",
+    "GroupNormalization": "GroupNorm",
+    "MaxPool": "Pooling",
+    "AveragePool": "Pooling",
+    "GlobalAveragePool": "Pooling",
+    "GlobalMaxPool": "Pooling",
+    "Add": "BinaryOp",
+    "Sub": "BinaryOp",
+    "Mul": "BinaryOp",
+    "Div": "BinaryOp",
+    "Pow": "Power",
+    "Resize": "Interp",
+    "Upsample": "Interp",
+    "Transpose": "Permute",
+    "Unsqueeze": "ExpandDims",
+    "ReduceMean": "Reduction",
+    "ReduceSum": "Reduction",
+    "ReduceMax": "Reduction",
+    "ReduceMin": "Reduction",
+    "LeakyRelu": "ReLU",
+    "SiLU": "Swish",
+    "Gemm": "Gemm"
+  },
+  "onnx_replace": {
+    "NonMaxSuppression": {
+      "to": "YoloDetectionOutput / YoloV3DetectionOutput",
+      "hint": "NCNN 无通用 NMS 算子；检测后处理建议用专用检测输出层，或把 NMS 放在端侧推理代码里"
+    },
+    "Gather": {
+      "to": "Embedding（1D）或 Crop/Slice 组合",
+      "hint": "NCNN 无通用 Gather；索引取 tensor 建议 pnnx 转换时用 Embedding/Crop 等价替代"
+    }
+  }
 }
