@@ -110,6 +110,30 @@ def pnnx_convert(onnx: Path, param: Path, bin_: Path, tool: str, input_shape: st
     return {"elapsed_ms": r["elapsed_ms"], "size_bytes": bin_.stat().st_size}
 
 
+def patch_concat_axis(param: Path) -> int:
+    """修复 pnnx 对检测模型 decode head 的 concat 轴映射 bug（0=1 → 0=2）。
+
+    实测（T1.7 YOLOX）：decode head 的 3 个 reshape 输出 [N,11] 后 concat，pnnx 把
+    concat 轴错转成 0=1（沿 h），导致输出形状 (1,1600,33) 而非 (1,2100,11)。
+    正确应沿 c 轴（0=2）拼接。对不含 0=1 concat 的模型此函数是 no-op
+    （ncnn 中沿 h 轴 0=1 的 concat 本身罕见，多为 pnnx 误转）。
+    """
+    lines = param.read_text(encoding="utf-8").splitlines()
+    fixed = 0
+    for i, ln in enumerate(lines):
+        t = ln.split()
+        if t and t[0] == "Concat" and "0=1" in t:
+            cols = ln.split()
+            for j, tok in enumerate(cols):
+                if tok == "0=1":
+                    cols[j] = "0=2"
+                    fixed += 1
+            lines[i] = " ".join(cols)
+    if fixed:
+        param.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return fixed
+
+
 def optimize(param: Path, bin_: Path, opt_param: Path, opt_bin: Path, tool: str) -> dict:
     # 最后一个参数 0 = 保持 FP32（65536 = FP16）
     r = run_cmd([tool, str(param), str(bin_), str(opt_param), str(opt_bin), "0"])
@@ -164,6 +188,11 @@ def convert(args) -> dict:
     bin_ = out / f"{stem}.bin"
     r = pnnx_convert(cur_onnx, param, bin_, pnnx, args.input_shape)
     steps.append({"name": "pnnx", **r})
+
+    # 2.5 修复 pnnx 对检测模型 decode head 的 concat 轴映射 bug（无 0=1 concat 时 no-op）
+    fixed = patch_concat_axis(param)
+    if fixed:
+        steps.append({"name": "patch_concat_axis", "fixed": fixed})
 
     # 3. ncnnoptimize
     ncnnoptimize = require_tool("ncnnoptimize", args.ncnn_tools)
