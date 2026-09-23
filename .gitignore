@@ -21,6 +21,7 @@ annotator/web/dist/
 demo/neu_det/dataset/
 demo/neu_det/calib_*/
 scripts/assets/
+annotator/server/data/
 
 # 系统
 .DS_Store
