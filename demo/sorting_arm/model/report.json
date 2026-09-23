@@ -1,0 +1,38 @@
+{
+  "model": "c:\\Users\\zzyly\\Desktop\\2026上海开源大赛\\tools\\paper_mobilenetv2.onnx",
+  "quant": "fp32",
+  "steps": [
+    {
+      "name": "onnxsim",
+      "elapsed_ms": 641.0470008850098,
+      "output": "c:\\Users\\zzyly\\Desktop\\2026上海开源大赛\\rq-visionkit\\demo\\sorting_arm\\model\\paper_mobilenetv2.sim.onnx",
+      "size_bytes": 8835724
+    },
+    {
+      "name": "pnnx",
+      "elapsed_ms": 659.775972366333,
+      "size_bytes": 4392532
+    },
+    {
+      "name": "ncnnoptimize",
+      "elapsed_ms": 201.42555236816406,
+      "size_bytes": 8784852
+    }
+  ],
+  "outputs": {
+    "fp32": {
+      "param": "paper_mobilenetv2.opt.param",
+      "bin": "paper_mobilenetv2.opt.bin",
+      "bin_size": 8784852
+    },
+    "int8": null
+  },
+  "latency_ms": {
+    "fp32": null,
+    "int8": null
+  },
+  "mAP": {
+    "fp32": null,
+    "int8": null
+  }
+}
