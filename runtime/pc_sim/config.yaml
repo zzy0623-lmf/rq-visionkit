@@ -1,0 +1,20 @@
+# RQ-VisionKit M4 端侧运行时配置（PC 仿真版）
+# 模型文件与代码分离：修改本文件指向新模型目录 / 调参数，
+# 然后 POST /model/reload 即可生效，无需重启进程。
+
+model_dir: "C:/Users/zzyly/Desktop/2026上海开源大赛/tools/ncnn_nofocus"
+model_name: "yolox_neudet"
+version: "1.0.0"
+input_size: 320
+conf_thres: 0.01
+nms_thres: 0.65
+quant: "fp32"
+input_blob: "in0"
+output_blob: "out0"
+classes:
+  - crazing
+  - inclusion
+  - patches
+  - pitted_surface
+  - rolled-in_scale
+  - scratches

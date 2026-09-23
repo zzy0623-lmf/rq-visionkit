@@ -31,9 +31,9 @@
 | thop | 0.1.1 | MIT | 模型 FLOPs 统计（YOLOX） | ✅ |
 | ninja | 1.13.2 | Apache-2.0 | torch 编译加速（传递） | ✅（传递） |
 | tabulate | 0.10.0 | MIT | YOLOX 表格输出 | ✅ |
-| psutil | 7.0 | BSD-3-Clause | YOLOX 资源监控 | ✅ |
+| psutil | 7.2.2 | BSD-3-Clause | YOLOX 资源监控 / M4 运行时 mem_kb | ✅ |
 | tensorboard | 2.21.0 | Apache-2.0 | YOLOX 训练日志 | ✅ |
-| pyyaml | — | MIT | 配置文件解析 | 📌 |
+| pyyaml | 6.0.3 | MIT | 配置文件解析（M4 运行时 config.yaml） | ✅ |
 | paramiko | — | **LGPL-2.1-or-later** | SSH 下发部署包（T2.3） | ⚠️ 见下方决策 |
 
 ## 前端依赖（T1.2 起）
