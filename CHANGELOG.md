@@ -16,6 +16,8 @@
 ### Changed
 
 - README 新增「功能模块导航」与实测可用的「快速开始」（全量测试 51 passed）。
+- M4 板端运行时已在 RK3506 官方 SDK 工程交叉编译通过（`app.elf` 10.4MB / `app.bin` 4.6MB），
+  修复 imgproc/highgui 头文件、不存在的 `rt_memory_info`、回调返回类型等编译问题。
 
 ## [1.0.0-rc] - 2026-09-24
 

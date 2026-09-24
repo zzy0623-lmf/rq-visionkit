@@ -38,8 +38,9 @@
 1. 在 RuiChing Studio 里按官方文档新建/打开 `09_ai_mobilenetv2_yolov3` 示例工程。
 2. 将本目录 5 个文件复制到工程的 `applications/` 目录：
    `yolox_inferencer.h/.cpp`、`classify_inferencer.h/.cpp`、`runtime_server.cpp`。
-3. **删除或改名** `applications/main.c`（`runtime_server.cpp` 已含入口，
-   避免 `main` 重定义）；官方 `yolov3.cpp` 可保留（其 `mnet_yolov3_test` 命令仍可用）。
+3. **保留** `applications/main.c`（其 `main()` 提供 main 线程入口）；`runtime_server.cpp`
+   通过 `INIT_APP_EXPORT` 自动启动，两者不冲突。官方 `yolov3.cpp` 可保留
+   （其 `mnet_yolov3_test` 命令仍可用）。
 4. 在工程配置里确认 webnet 的 **CGI** 与 **Upload** 模块已启用
    （`WEBNET_USING_CGI`、`WEBNET_USING_UPLOAD`；Upload 未启用时需在 menuconfig 打开）。
 5. 编译 → 固化 APP。
@@ -50,6 +51,19 @@
 `/data` 为板载 nandfs 挂载点（T2.2 摸底确认，无需 TF 卡）。可用 msh 的 `wget`/`tftp`
 把 rq-convert 产物放到 `/data/model/`，或由部署控制台 SSH 下发。
 
+## 编译状态（2026-09-24）
+
+已在 RK3506 官方 SDK 工程（`09_ai_mobilenetv2_yolov3_2`，BSP 1.4.0 + gcc-arm-10.3.1）上
+**交叉编译通过**：`arm-none-eabi-size` 实测 text 4.6MB / data 40KB / bss 106KB，产出
+`app.elf`（10.4MB）与 `app.bin`（4.6MB）。编译时修复 4 处代码问题（补 imgproc/highgui
+头文件、移除不存在的 `rt_memory_info`、回调返回类型改为 int），见 git 提交 `8b517b6`。
+
+> 注：工程 `rtconfig.py` 的 `COMPILER_CONFIGS.values()` 解包在 Python 2.7 下因 dict
+> 无序会错位（链接命令混入汇编 `-c` 标志），已改为显式键名取值；该改动在 SDK 工程内，
+> 不在本仓库。
+
+因板子无法运行，固件**尚未上板实测**，板端时延/内存基线待补（见 docs/baselines.md）。
+
 ## 已知限制（上板验证重点）
 
 1. **类别名硬编码**：`CLASS_NAMES` 在此硬编码为 NEU-DET 六类，与 deployer 下发的
@@ -59,6 +73,8 @@
 3. **webnet upload 响应**：`webnet_session_printf`/`set_header` 直接 `send()` 到 socket，
    不依赖 phase 状态机，故 `upload_done` 回调内写响应体可用（已对照 wn_session.c 确认）；
    仍需上板实测确认 multipart 图片完整接收。
+4. **mem_kb 返回 0**：此 SDK 版本无 `rt_memory_info` 接口，`/infer` 的 `mem_kb` 暂返回 0，
+   待板端实测后用可用接口回填。
 
 ## 与任务书的关系
 
