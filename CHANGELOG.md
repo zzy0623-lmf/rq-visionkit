@@ -2,6 +2,21 @@
 
 格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循语义化版本。
 
+## [1.0.0] - 2026-09-24
+
+正式发布：全流程工具链 + 板端运行时 + 材料冲刺。
+
+### Added
+
+- M4 板端运行时（RK3506，C/C++ + NCNN）：检测 + 分类，与 PC 仿真同接口契约（T2.2）。
+- 适配方案与性能测试报告 `docs/adaptation-report.md`（T3.1）。
+- 作品介绍文档 `docs/project-intro.md` + PDF（T3.2）。
+- 演示视频分镜与配音脚本 `docs/video-script.md`（T3.3）。
+
+### Changed
+
+- README 新增「功能模块导航」与实测可用的「快速开始」（全量测试 51 passed）。
+
 ## [1.0.0-rc] - 2026-09-24
 
 Phase 2 出口：低代码部署控制台 + 端侧运行时 + 端到端联调。
