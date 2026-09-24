@@ -20,20 +20,32 @@ RQ-VisionKit 补齐这条链路，让自定义视觉模型不写代码即可在 
 | `scripts/` | 训练、基准测试等脚本 |
 | `docs/` | 架构、许可证清单、性能基线、路线图 |
 
-## 快速开始
+## 功能模块导航
 
-> 占位：当前处于 Phase 0（打地基）阶段，最小闭环尚未打通。
-> 完整「30 分钟复现 Demo」指南将在 v1.0.0 发布前实测补齐（见 `docs/roadmap.md`）。
+四个功能模块（M1–M4）对应赛题完整工具链，各模块独立可测：
+
+| 模块 | 目录 | 交付内容 | 测试入口 |
+|---|---|---|---|
+| M1 采集与标注 | `annotator/` | FastAPI 后端 + Vue3 标注前端（导入/标注/导出 YOLO 数据集） | `pytest annotator/tests -v` |
+| M2 模型转换 | `converter/` | ONNX→NCNN 一键转换 CLI（含算子兼容扫描） | `pytest converter/tests -v` |
+| M3 部署控制台 | `deployer/` | 低代码部署（打包 / 本地 / SSH 下发 / reload / 结果看板） | `pytest deployer/tests -v` |
+| M4 端侧运行时 | `runtime/` | `pc_sim/` PC 仿真（Python），`board/` RK3506 板端（C/C++，检测+分类） | `pytest runtime/pc_sim/tests -v` |
+
+## 快速开始
 
 环境要求：Windows + Python 3.10+ + Node 18+ + Git。
 
 ```bash
-# 安装 Python 依赖（任务书基线）
+# 1. 安装 Python 依赖
 pip install fastapi uvicorn onnx onnxsim ncnn pyyaml opencv-python numpy pytest
 
-# 运行测试
-pytest tests/ -v
+# 2. 运行全部测试（M1/M2/M3/M4 + 仓库结构）
+pytest tests/ annotator/tests converter/tests deployer/tests runtime/pc_sim/tests -v
 ```
+
+六步主流程（采集→标注→训练→转换→部署→推理查看）的端到端复现记录见
+[docs/e2e-run.md](docs/e2e-run.md)；性能基线见 [docs/baselines.md](docs/baselines.md)；
+系统架构见 [docs/architecture.md](docs/architecture.md)。
 
 ## 许可证
 
