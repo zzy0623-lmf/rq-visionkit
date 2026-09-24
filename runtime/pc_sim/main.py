@@ -70,9 +70,13 @@ def create_app(config_path: str | None = None) -> FastAPI:
         if img is None:
             raise HTTPException(status_code=415, detail="无法解码图片")
         with _LOCK:
-            boxes, inference_ms = state.inferencer.infer(img)
+            result, inference_ms = state.inferencer.infer(img)
         mem_kb = psutil.Process().memory_info().rss // 1024
-        return {"boxes": boxes, "inference_ms": round(inference_ms, 2), "mem_kb": mem_kb}
+        base = {"task": state.inferencer.task,
+                "inference_ms": round(inference_ms, 2), "mem_kb": mem_kb}
+        if state.inferencer.task == "classify":
+            return {**base, "classes": result}
+        return {**base, "boxes": result}
 
     @app.get("/health")
     def health():
@@ -81,6 +85,7 @@ def create_app(config_path: str | None = None) -> FastAPI:
             "version": state.cfg.get("version"),
             "uptime_s": round(state.uptime_s, 2),
             "quant": state.cfg.get("quant"),
+            "task": state.cfg.get("task", "detect"),
             "num_classes": len(state.cfg.get("classes", [])),
         }
 

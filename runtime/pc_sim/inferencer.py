@@ -5,6 +5,7 @@
 运行时只负责按配置加载与推理。
 """
 
+import time
 from pathlib import Path
 
 import cv2
@@ -22,6 +23,11 @@ class NcnnInferencer:
         self.input_blob = cfg.get("input_blob", "in0")
         self.output_blob = cfg.get("output_blob", "out0")
         self.num_classes = len(self.classes)
+        # task: detect（YOLOX 检测）| classify（分类，softmax 输出）
+        self.task = cfg.get("task", "detect")
+        # 分类模型预处理（mean/norm，去 Lambda 后由 ncnn 层完成）
+        self.mean = list(cfg.get("mean", [127.5, 127.5, 127.5]))
+        self.norm = list(cfg.get("norm", [1 / 127.5, 1 / 127.5, 1 / 127.5]))
         self.net = None
 
     # ---- 模型加载 ----
@@ -119,17 +125,56 @@ class NcnnInferencer:
                 })
         return final
 
+    # ---- 分类（classify）后处理 ----
+
+    def _preproc_classify(self, img_bgr):
+        """分类预处理：resize → BGR2RGB → NCHW float32（mean/norm 由 ncnn 层完成）。"""
+        size = self.input_size
+        resized = cv2.resize(img_bgr, (size, size), interpolation=cv2.INTER_LINEAR)
+        rgb = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
+        return np.ascontiguousarray(rgb.transpose(2, 0, 1), dtype=np.float32)
+
+    def _postprocess_classify(self, arr, top_k: int = 5):
+        """模型输出已含 softmax（Dense(softmax)），直接取概率并降序取 top_k。"""
+        probs = np.asarray(arr).reshape(-1)
+        order = np.argsort(probs)[::-1]
+        k = min(top_k, len(probs))
+        return [
+            {
+                "class_id": int(i),
+                "class_name": self.classes[i] if i < self.num_classes else str(i),
+                "score": float(probs[i]),
+            }
+            for i in order[:k]
+        ]
+
     # ---- 推理入口 ----
 
     def infer(self, img_bgr) -> tuple[list, float]:
-        """返回 (boxes, inference_ms)。boxes 元素为 {x1,y1,x2,y2,score,class_id,class_name}。"""
-        import time
+        """返回 (result, inference_ms)。
 
+        - task=detect：result 为 boxes，元素 {x1,y1,x2,y2,score,class_id,class_name}
+        - task=classify：result 为 top-k 类别，元素 {class_id,class_name,score}（降序）
+        """
         if self.net is None:
             raise RuntimeError("模型未加载，先调用 load()")
 
-        x, r = self._preproc(img_bgr)
         ex = self.net.create_extractor()
+
+        if self.task == "classify":
+            x = self._preproc_classify(img_bgr)
+            mat = ncnn.Mat(x)
+            mat.substract_mean_normalize(self.mean, self.norm)
+            ex.input(self.input_blob, mat)
+            t0 = time.perf_counter()
+            ret, out = ex.extract(self.output_blob)
+            inference_ms = (time.perf_counter() - t0) * 1000
+            if ret != 0:
+                raise RuntimeError(f"extract 失败，返回码 {ret}")
+            return self._postprocess_classify(np.array(out)), inference_ms
+
+        # detect（YOLOX）
+        x, r = self._preproc(img_bgr)
         ex.input(self.input_blob, ncnn.Mat(x))
         t0 = time.perf_counter()
         ret, out = ex.extract(self.output_blob)

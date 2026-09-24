@@ -5,12 +5,18 @@
 model_dir: "C:/Users/zzyly/Desktop/2026上海开源大赛/tools/ncnn_nofocus"
 model_name: "yolox_neudet"
 version: "1.0.0"
+# task: detect（YOLOX 检测，默认）| classify（分类，模型输出 softmax）
+task: "detect"
 input_size: 320
 conf_thres: 0.01
 nms_thres: 0.65
 quant: "fp32"
 input_blob: "in0"
 output_blob: "out0"
+# 分类模型（task=classify）额外参数：resize 尺寸用 input_size（如 224），
+# mean/norm 对应 Keras 预处理的 (x - mean) * norm（去 Lambda 后由 ncnn 层完成）。
+# mean: [127.5, 127.5, 127.5]
+# norm: [0.007843137, 0.007843137, 0.007843137]
 classes:
   - crazing
   - inclusion
