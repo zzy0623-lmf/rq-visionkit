@@ -4,6 +4,8 @@
 用法：
     python scripts/export_neudet.py --mode fp32
     python scripts/export_neudet.py --mode int8 [--calib 校准集目录]
+    # T2.4 联调等场景可覆盖默认路径（均带默认值，向后兼容）：
+    python scripts/export_neudet.py --exp <exp文件> --ckpt <权重> --out <输出目录> --stem <前缀>
 
 流程（含三处已实测验证的转换修复）：
     1. 加载模型，用固定 stride-2 space-to-depth 卷积替换 stem 的 Focus（数值等价 diff=0.0）
@@ -29,13 +31,19 @@ from pathlib import Path
 import torch
 from torch import nn
 
-YOLOX = Path(r"c:\Users\zzyly\Desktop\2026上海开源大赛\tools\yolox")
-CONVERTER = Path(r"c:\Users\zzyly\Desktop\2026上海开源大赛\rq-visionkit\converter")
-NCNN_TOOLS = Path(r"c:\Users\zzyly\Desktop\2026上海开源大赛\tools\ncnn-bin")
+# 路径全部环境变量驱动（默认值向后兼容，可在其他机器上覆盖）：
+#   RQ_TOOLS_DIR          tools 目录根（默认仓库同级 tools/）
+#   RQ_YOLOX_OUTPUT_DIR   YOLOX 训练/导出输出目录（默认 C:\yolox_outputs）
+REPO_ROOT = Path(__file__).resolve().parent.parent
+TOOLS_DIR = Path(os.environ.get("RQ_TOOLS_DIR", str(REPO_ROOT.parent / "tools")))
+YOLOX = TOOLS_DIR / "yolox"
+CONVERTER = REPO_ROOT / "converter"
+NCNN_TOOLS = TOOLS_DIR / "ncnn-bin"
 
+YOLOX_OUTPUT = Path(os.environ.get("RQ_YOLOX_OUTPUT_DIR", r"C:\yolox_outputs"))
 EXP = str(YOLOX / "exps/neudet/yolox_nano_neudet.py")
-CKPT = r"C:\yolox_outputs\yolox_nano_neudet\best_ckpt.pth"
-NCNN_OUT = Path(r"C:\yolox_outputs\ncnn")
+CKPT = str(YOLOX_OUTPUT / "yolox_nano_neudet" / "best_ckpt.pth")
+NCNN_OUT = YOLOX_OUTPUT / "ncnn"
 STEM = "yolox_neudet"
 INPUT_SHAPE = "1,3,320,320"
 
@@ -55,16 +63,16 @@ def make_space_to_depth(in_channels=3):
     return conv
 
 
-def load_model():
+def load_model(exp_file: str = EXP, ckpt_path: str = CKPT):
     """加载训练好的模型，替换 Focus，设置 decode_in_inference=False，返回 model。"""
     sys.path.insert(0, str(YOLOX))
     from yolox.exp import get_exp
     from yolox.models.network_blocks import SiLU
     from yolox.utils import replace_module
 
-    exp = get_exp(EXP)
+    exp = get_exp(exp_file)
     model = exp.get_model()
-    ckpt = torch.load(CKPT, map_location="cpu", weights_only=False)
+    ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
     if "model" in ckpt:
         ckpt = ckpt["model"]
     model.load_state_dict(ckpt)
@@ -151,13 +159,21 @@ def main() -> int:
     p = argparse.ArgumentParser(description="YOLOX → ONNX → NCNN")
     p.add_argument("--mode", choices=["fp32", "int8"], default="fp32")
     p.add_argument("--calib", help="INT8 校准集图片目录（默认从 train2017 抽 100 张）")
+    p.add_argument("--exp", default=EXP, help="YOLOX exp 配置文件（默认 T1.7 NEU-DET 配置）")
+    p.add_argument("--ckpt", default=CKPT, help="训练权重路径（默认 T1.7 best_ckpt.pth）")
+    p.add_argument("--out", default=str(NCNN_OUT), help="产物输出目录（默认 RQ_YOLOX_OUTPUT_DIR/ncnn）")
+    p.add_argument("--stem", default=STEM, help="产物文件名前缀（默认 yolox_neudet）")
+    p.add_argument("--input-shape", default=INPUT_SHAPE, help="输入尺寸 N,C,H,W（默认 1,3,320,320）")
     args = p.parse_args()
 
-    NCNN_OUT.mkdir(parents=True, exist_ok=True)
-    onnx_out = NCNN_OUT / f"{STEM}.onnx"
+    out_dir = Path(args.out)
+    stem = args.stem
+    input_shape = args.input_shape
+    out_dir.mkdir(parents=True, exist_ok=True)
+    onnx_out = out_dir / f"{stem}.onnx"
 
     # 1. 加载 + 替换 Focus + 导出 ONNX（内联）
-    model = load_model()
+    model = load_model(args.exp, args.ckpt)
     export_onnx(model, onnx_out)
 
     # 2. 算子兼容性扫描（报告用途）
@@ -169,36 +185,36 @@ def main() -> int:
     ncnnoptimize = NCNN_TOOLS / "ncnnoptimize.exe"
 
     # 3. pnnx 转 ncnn（fp16=0）
-    param = NCNN_OUT / f"{STEM}.param"
-    bin_ = NCNN_OUT / f"{STEM}.bin"
-    run([str(pnnx), str(onnx_out), f"inputshape=[{INPUT_SHAPE}]", "fp16=0",
-         f"pnnxparam={NCNN_OUT / (STEM + '.pnnx.param')}",
-         f"pnnxbin={NCNN_OUT / (STEM + '.pnnx.bin')}",
-         f"pnnxpy={NCNN_OUT / (STEM + '_pnnx.py')}",
-         f"ncnnpy={NCNN_OUT / (STEM + '_ncnn.py')}",
-         f"ncnnparam={param}", f"ncnnbin={bin_}"], NCNN_OUT)
+    param = out_dir / f"{stem}.param"
+    bin_ = out_dir / f"{stem}.bin"
+    run([str(pnnx), str(onnx_out), f"inputshape=[{input_shape}]", "fp16=0",
+         f"pnnxparam={out_dir / (stem + '.pnnx.param')}",
+         f"pnnxbin={out_dir / (stem + '.pnnx.bin')}",
+         f"pnnxpy={out_dir / (stem + '_pnnx.py')}",
+         f"ncnnpy={out_dir / (stem + '_ncnn.py')}",
+         f"ncnnparam={param}", f"ncnnbin={bin_}"], out_dir)
 
     # 4. 修复 concat 轴（在 ncnnoptimize 之前）
-    patched = NCNN_OUT / f"{STEM}.patched.param"
+    patched = out_dir / f"{stem}.patched.param"
     patch_concat_axis(param, patched)
 
     # 5. ncnnoptimize（FP32）
-    opt_param = NCNN_OUT / f"{STEM}.opt.param"
-    opt_bin = NCNN_OUT / f"{STEM}.opt.bin"
-    run([str(ncnnoptimize), str(patched), str(bin_), str(opt_param), str(opt_bin), "0"], NCNN_OUT)
+    opt_param = out_dir / f"{stem}.opt.param"
+    opt_bin = out_dir / f"{stem}.opt.bin"
+    run([str(ncnnoptimize), str(patched), str(bin_), str(opt_param), str(opt_bin), "0"], out_dir)
 
     # 6. INT8
     if args.mode == "int8":
         calib_dir = Path(args.calib) if args.calib else Path(r"C:\neudet_coco\train2017")
-        list_file = prepare_calib(calib_dir, NCNN_OUT)
-        table = NCNN_OUT / f"{STEM}.table"
+        list_file = prepare_calib(calib_dir, out_dir)
+        table = out_dir / f"{stem}.table"
         run([str(NCNN_TOOLS / "ncnn2table.exe"), str(opt_param), str(opt_bin), str(list_file), str(table),
-             "mean=[0,0,0]", "norm=[1,1,1]", "shape=[320,320,3]", "pixel=BGR", "method=kl", "thread=8"], NCNN_OUT)
-        int8_param = NCNN_OUT / f"{STEM}.int8.param"
-        int8_bin = NCNN_OUT / f"{STEM}.int8.bin"
-        run([str(NCNN_TOOLS / "ncnn2int8.exe"), str(opt_param), str(opt_bin), str(int8_param), str(int8_bin), str(table)], NCNN_OUT)
+             "mean=[0,0,0]", "norm=[1,1,1]", "shape=[320,320,3]", "pixel=BGR", "method=kl", "thread=8"], out_dir)
+        int8_param = out_dir / f"{stem}.int8.param"
+        int8_bin = out_dir / f"{stem}.int8.bin"
+        run([str(NCNN_TOOLS / "ncnn2int8.exe"), str(opt_param), str(opt_bin), str(int8_param), str(int8_bin), str(table)], out_dir)
 
-    print("\n导出完成，产物在", NCNN_OUT)
+    print("\n导出完成，产物在", out_dir)
     return 0
 
 

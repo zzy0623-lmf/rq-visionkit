@@ -24,7 +24,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-YOLOX = Path(r"c:\Users\zzyly\Desktop\2026上海开源大赛\tools\yolox")
+# tools 目录根（仓库外，含 yolox / ncnn-bin 等）：
+# 默认仓库同级 tools/，可用环境变量 RQ_TOOLS_DIR 覆盖。
+REPO_ROOT = Path(__file__).resolve().parent.parent
+TOOLS_DIR = Path(os.environ.get("RQ_TOOLS_DIR", str(REPO_ROOT.parent / "tools")))
+YOLOX = TOOLS_DIR / "yolox"
 EXP = "exps/neudet/yolox_nano_neudet.py"
 
 

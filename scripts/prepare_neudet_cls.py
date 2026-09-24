@@ -12,12 +12,19 @@
 """
 
 import json
+import os
 import shutil
 from collections import Counter, defaultdict
 from pathlib import Path
 
-SRC = Path(r"C:\neudet_coco")
-DST = Path(r"C:\Users\zzyly\Desktop\嵌入式AI视觉机械臂智能分拣系统V1.0_源代码\data\dataset")
+# 路径环境变量驱动（默认值向后兼容）：
+#   RQ_NEUDET_COCO_DIR      NEU-DET COCO 数据目录（默认 C:\neudet_coco）
+#   RQ_SORTING_DATASET_DIR  机械臂分拣分类数据集输出目录
+SRC = Path(os.environ.get("RQ_NEUDET_COCO_DIR", r"C:\neudet_coco"))
+DST = Path(os.environ.get(
+    "RQ_SORTING_DATASET_DIR",
+    r"C:\Users\zzyly\Desktop\嵌入式AI视觉机械臂智能分拣系统V1.0_源代码\data\dataset",
+))
 CATS = ["crazing", "inclusion", "patches", "pitted_surface", "rolled-in_scale", "scratches"]
 
 
