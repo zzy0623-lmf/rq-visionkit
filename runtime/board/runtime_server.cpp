@@ -23,7 +23,7 @@
 #include <wn_request.h>
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>          /* cv::imdecode */
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "yolox_inferencer.h"
@@ -192,14 +192,12 @@ static int infer_upload_write(struct webnet_session* session, const void* data, 
     return length;
 }
 
-static void infer_upload_done(struct webnet_session* session)
+static int infer_upload_done(struct webnet_session* session)
 {
     struct UploadCtx* ctx = (struct UploadCtx*)webnet_upload_get_userdata(session);
     rt_tick_t t0 = 0, t1 = 0;
-    rt_size_t total_mem = 0, used_mem = 0, max_used = 0;
     char tmp[512];
 
-    rt_memory_info(&total_mem, &used_mem, &max_used);
     webnet_session_set_header(session, "application/json", 200, "OK", -1);
 
     if (ctx == RT_NULL || ctx->data == RT_NULL)
@@ -233,11 +231,11 @@ static void infer_upload_done(struct webnet_session* session)
             webnet_session_printf(session, "%s", tmp);
         }
         webnet_session_printf(session,
-            "],\"inference_ms\":%lu,\"mem_kb\":%lu}",
-            (unsigned long)(t1 - t0), (unsigned long)(used_mem / 1024));
+            "],\"inference_ms\":%lu,\"mem_kb\":0}",
+            (unsigned long)(t1 - t0));
         rt_kprintf("[runtime] /infer detect: %d boxes, %lu ms\n",
                    (int)boxes.size(), (unsigned long)(t1 - t0));
-        return;
+        return 0;
     }
 #else /* TASK_CLASSIFY */
     if (g_classifier == 0)
@@ -266,17 +264,17 @@ static void infer_upload_done(struct webnet_session* session)
             webnet_session_printf(session, "%s", tmp);
         }
         webnet_session_printf(session,
-            "],\"inference_ms\":%lu,\"mem_kb\":%lu}",
-            (unsigned long)(t1 - t0), (unsigned long)(used_mem / 1024));
+            "],\"inference_ms\":%lu,\"mem_kb\":0}",
+            (unsigned long)(t1 - t0));
         rt_kprintf("[runtime] /infer classify: top-1 %d, %lu ms\n",
                    topk.empty() ? -1 : topk[0].class_id, (unsigned long)(t1 - t0));
-        return;
+        return 0;
     }
 #endif
 
 __empty:
-    webnet_session_printf(session,
-        "{\"inference_ms\":0,\"mem_kb\":%lu}", (unsigned long)(used_mem / 1024));
+    webnet_session_printf(session, "{\"inference_ms\":0,\"mem_kb\":0}");
+    return 0;
 }
 
 static int infer_upload_close(struct webnet_session* session)
@@ -293,7 +291,7 @@ static int infer_upload_close(struct webnet_session* session)
 
 /* ---- 服务器初始化（INIT_APP_EXPORT 自动启动） ---- */
 
-static void runtime_server_init(void)
+static int runtime_server_init(void)
 {
     static const struct webnet_module_upload_entry infer_entry = {
         "/infer",            /* url */
@@ -318,6 +316,7 @@ static void runtime_server_init(void)
     rt_kprintf("[runtime]   GET  /cgi-bin/health\n");
     rt_kprintf("[runtime]   POST /cgi-bin/reload\n");
     rt_kprintf("[runtime]   POST /infer  (multipart image)\n");
+    return 0;
 }
 INIT_APP_EXPORT(runtime_server_init);
 

@@ -122,7 +122,6 @@ static void generate_yolox_proposals(const std::vector<GridAndStride>& grid_stri
                                      int num_classes, std::vector<Box>& objects)
 {
     const int num_anchors = (int)grid_strides.size();
-    const int num_preds = num_classes + 5; /* x,y,w,h,obj + classes */
 
     for (int anchor_idx = 0; anchor_idx < num_anchors; anchor_idx++)
     {

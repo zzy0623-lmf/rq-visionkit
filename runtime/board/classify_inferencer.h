@@ -14,6 +14,7 @@
 
 #include "net.h"
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 /* 分类结果（对应 PC 版 classes 元素的 class_id/class_name/score） */
 struct Classification

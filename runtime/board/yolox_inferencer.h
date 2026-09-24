@@ -17,6 +17,7 @@
 
 #include "net.h"                 /* ncnn::Net / ncnn::Mat */
 #include <opencv2/core/core.hpp> /* cv::Mat */
+#include <opencv2/imgproc/imgproc.hpp> /* cv::resize */
 
 /* 检测框（对应 PC 版 boxes 元素的 x1/y1/x2/y2/score/class_id） */
 struct Box
