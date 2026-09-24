@@ -16,7 +16,7 @@ jobs:
       - name: Install test dependencies
         run: pip install pytest fastapi "uvicorn[standard]" python-multipart httpx numpy opencv-python pyyaml psutil
       - name: Run pytest
-        run: pytest tests/ annotator/tests/ converter/tests/ runtime/pc_sim/tests/ -v
+        run: pytest tests/ annotator/tests/ converter/tests/ deployer/tests/ runtime/pc_sim/tests/ -v
 
   frontend:
     name: Frontend build check

@@ -34,7 +34,7 @@
 | psutil | 7.2.2 | BSD-3-Clause | YOLOX 资源监控 / M4 运行时 mem_kb | ✅ |
 | tensorboard | 2.21.0 | Apache-2.0 | YOLOX 训练日志 | ✅ |
 | pyyaml | 6.0.3 | MIT | 配置文件解析（M4 运行时 config.yaml） | ✅ |
-| paramiko | — | **LGPL-2.1-or-later** | SSH 下发部署包（T2.3） | ⚠️ 见下方决策 |
+| paramiko | — | LGPL-2.1-or-later | （原计划）SSH 下发部署包 | ❌ 规避，改用 OpenSSH subprocess |
 
 ## 前端依赖（T1.2 起）
 
@@ -66,13 +66,11 @@
 |---|---|---|---|
 | NEU-DET（东北大学钢材表面缺陷数据集） | 官方页：faculty.neu.edu.cn/songkechen（直链 Google Drive/百度网盘）；本仓库经 GitHub 镜像 siddhartamukherjee/NEU-DET-Steel-Surface-Defect-Detection 获取完整 1800 张 | 无显式许可证；作者注明供学术研究使用并要求引用其论文。本项目仅非商业竞赛/研究用途，**数据集本体不入库、不再分发**，详见 demo/neu_det/README.md | ✅ |
 
-## ⚠️ 待决策：paramiko 许可证冲突
+## ✅ 已决策：paramiko 许可证冲突（2026-09-23）
 
 任务书第 1 节依赖清单含 `paramiko`，但其许可证为 **LGPL-2.1-or-later**，不在
-Apache-2.0 / MIT / BSD 允许范围内。候选替代（T2.3 前必须定）：
+Apache-2.0 / MIT / BSD 允许范围内。已按 **方案 1** 定案并落地：
 
-1. **改用 OpenSSH 命令行**：通过 `subprocess` 调用系统 `ssh`/`scp` 下发部署包。零依赖、零许可证风险。Windows 10+ 自带 OpenSSH 客户端。
-2. **换库**：如 `asyncssh`（EPL-2.0，同样不在白名单）——无合适的 MIT/BSD 纯 Python SSH 库。
-3. **为例外申请**：向评审说明 LGPL 动态链接用法。不推荐，徒增合规解释成本。
-
-**推荐方案 1**（OpenSSH + subprocess）。
+**改用 OpenSSH 命令行**：通过 `subprocess` 调用系统 `ssh`/`scp` 下发部署包。
+零第三方依赖、零许可证风险，Windows 10+ / Linux 自带 OpenSSH 客户端。
+实现见 `deployer/ssh.py`（`build_scp_argv` / `build_ssh_argv` / `deploy_ssh`）。

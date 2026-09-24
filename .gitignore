@@ -23,6 +23,10 @@ demo/neu_det/calib_*/
 scripts/assets/
 annotator/server/data/
 
+# 部署控制台运行时产物（T2.3）
+.deploy-tmp/
+runtime/pc_sim/deployed_model/
+
 # 系统
 .DS_Store
 Thumbs.db

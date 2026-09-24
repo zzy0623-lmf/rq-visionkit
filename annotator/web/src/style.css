@@ -51,6 +51,26 @@ body {
   gap: 8px;
 }
 
+.main-nav {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.main-nav button {
+  border: 1px solid var(--line);
+  background: var(--card);
+  padding: 7px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+}
+.main-nav button.active {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

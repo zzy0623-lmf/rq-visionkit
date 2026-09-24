@@ -2,7 +2,9 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { api } from './api.js'
 import CanvasAnnotator from './components/CanvasAnnotator.vue'
+import DeployPanel from './components/DeployPanel.vue'
 
+const tab = ref('annotate') // 'annotate' | 'deploy'
 const view = ref('grid') // 'grid' | 'annotate'
 const images = ref([])
 const filter = ref('all')
@@ -143,20 +145,31 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeyDown))
 <template>
   <div class="app">
     <header class="bar">
-      <h1>RQ-VisionKit 标注工具</h1>
+      <h1>RQ-VisionKit</h1>
+      <nav class="main-nav">
+        <button :class="{ active: tab === 'annotate' }" @click="tab = 'annotate'">采集标注</button>
+        <button :class="{ active: tab === 'deploy' }" @click="tab = 'deploy'">模型部署</button>
+      </nav>
       <div class="bar-actions">
-        <label class="btn">
-          导入 zip
-          <input type="file" accept=".zip" hidden @change="onImportZip" />
-        </label>
-        <button class="btn" @click="onExport">导出数据集</button>
+        <template v-if="tab === 'annotate'">
+          <label class="btn">
+            导入 zip
+            <input type="file" accept=".zip" hidden @change="onImportZip" />
+          </label>
+          <button class="btn" @click="onExport">导出数据集</button>
+        </template>
       </div>
     </header>
 
     <p v-if="error" class="err">{{ error }}</p>
 
+    <!-- 部署控制台（M3） -->
+    <section v-if="tab === 'deploy'">
+      <DeployPanel />
+    </section>
+
     <!-- 网格列表视图 -->
-    <section v-if="view === 'grid'" class="grid-view">
+    <section v-else-if="view === 'grid'" class="grid-view">
       <div class="toolbar">
         <div class="tabs">
           <button :class="{ active: filter === 'all' }" @click="filter = 'all'">全部</button>

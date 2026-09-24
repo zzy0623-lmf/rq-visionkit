@@ -34,6 +34,8 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
+from deployer.routes import create_deploy_router
+
 ALLOWED_EXTS = {".jpg", ".jpeg", ".png", ".bmp"}
 _LOCK = threading.Lock()
 
@@ -242,6 +244,9 @@ class DatasetStore:
 def create_app(data_dir: Path | None = None) -> FastAPI:
     store = DatasetStore(data_dir or _default_data_dir())
     app = FastAPI(title="RQ-VisionKit Annotator", version="0.1.0")
+
+    # M3 部署控制台（与 M1 共用进程，任务书 T2.3）
+    app.include_router(create_deploy_router())
 
     class AnnotationIn(BaseModel):
         boxes: list = Field(default_factory=list, description="框列表：{class_id,x1,y1,x2,y2}")
