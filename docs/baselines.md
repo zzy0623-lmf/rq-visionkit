@@ -20,8 +20,6 @@
 | 2026-09-23 | RK3506 实测（RC-Pi-3506，串口 msh 双向交互，COM8 115200 8N1） | 无模型（T2.2 环境摸底） | — | — | heap 96MiB，可用 97,141,712 B（与 9-21 基线一致，`free` 实测） | — | T2.2 摸底：①`ifconfig` 双网口 e0=192.168.2.100 / e1=192.168.3.100（默认 e0，MAC 与 dtsi 一致），均 **LINK_DOWN**（未插网线）；②`mount`：**nandfs 挂载 /data**（板载 NAND，模型文件存放点，无需 TF 卡）、rom=/、devfs=/dev、tmp=/tmp；③**`app_upgrade app <app.img>` 命令实锤存在**——msh 内升级 APP，**T0.4「无 DAP-LINK 固化 APP」死结的免调试器通道**；④`help` 确认 webnet（list_webnet）、wget、tftp、telnet_server、iperf 均可用；⑤app 段 `Hello, RT-Thread app` 正常，nandfs/romfs/tmpfs 初始化正常 |
 | 2026-09-24 | PC 仿真（Windows 11, Python 3.10.11, ncnn 1.0.20260526） | MobileNetV2 六分类（NEU-DET，去 Lambda，NCNN） | FP32 | 9.0 ms（单张 crazing_115.jpg，224×224） | ~96 MB（进程 RSS） | accuracy 83.61%（沿用 T1.6 全量，本次仅链路验证） | T2.5 扩展 Demo：M4 运行时新增 `task=classify` 分支（resize+BGR2RGB+mean/norm，softmax 输出取 top-k），经 M3 部署 + `/infer` 返回 top-1 `crazing`（score 0.9975）。机械臂分拣因论文权重未找回 + 硬件未到，**降级为「分类识别 + 结果显示」**，详见 demo/sorting_arm/README.md |
 
-## 预测基线
-
 下表 RK3506 三行按「PC 仿真实测 + 计算性能预测」推算（板端实测前暂以估算值记录），待板端
 实测后回填为正式记录。划分规则：**精度/体积**与运行硬件无关（FP32 确定性浮点、同一
 .param/.bin），沿用 PC 仿真实测值；**时延**为硬件敏感项，按下方锚点与倍率推算。
@@ -31,8 +29,6 @@
 | 本项目 MobileNetV2 六分类 | FP32 | 83.61% | ≈480~720ms（224×224） | 8.86MB | 锚点：论文 RK3588S（8 核 Cortex-A76/A55，XNNPACK CPU，use_npu=False）MobileNetV2 五分类 FP32 实测 48.3ms；RK3506 为 3×Cortex-A7@1.5GHz（ARMv7、无 NPU），A76 单核性能约为 A7 的 5–10 倍（见 adaptation-report.md 4.2），叠加 8 核 vs 3 核核数差，综合减速比取约 10–15× → 48.3×(10~15) ≈ 480~720ms |
 | 本项目 YOLOX-Nano | FP32 | mAP 6.37% | ≈550~830ms（320×320） | 3.56MB | 按上述 MobileNetV2 减速区间，再乘以本项目 PC 实测时延比 YOLOX/MobileNetV2 = 10.29/9.0 ≈ 1.14× → (480~720)×1.14 ≈ 550~830ms |
 | 本项目 YOLOX-Nano | INT8 | mAP 6.71% | ≈550~830ms（320×320） | 945KB | RK3506（A7）无 int8 dot 指令，预期无提速，与 PC 实测「INT8 反慢 3%」结论一致（见上表 2026-09-22）；体积沿用 945KB |
-
-预测时延为估算值，板端实测回填后替换为本节正式记录。
 
 ## 待补基线清单
 
