@@ -18,7 +18,7 @@ RQ-VisionKit 补齐这条链路，让自定义视觉模型不写代码即可在 
 | `runtime/` | M4 端侧推理运行时（`pc_sim/` PC 仿真版，`board/` RK3506 板端版） |
 | `demo/` | 主 Demo：NEU-DET 钢材表面缺陷检测；扩展 Demo：机械臂分拣 |
 | `scripts/` | 训练、基准测试等脚本 |
-| `docs/` | 架构、许可证清单、性能基线、路线图 |
+| `docs/` | 架构、许可证清单、性能基线、路线图、板端部署调试手册 |
 
 ## 功能模块导航
 
@@ -45,7 +45,8 @@ pytest tests/ annotator/tests converter/tests deployer/tests runtime/pc_sim/test
 
 六步主流程（采集→标注→训练→转换→部署→推理查看）的端到端复现记录见
 [docs/e2e-run.md](docs/e2e-run.md)；性能基线见 [docs/baselines.md](docs/baselines.md)；
-系统架构见 [docs/architecture.md](docs/architecture.md)。
+系统架构见 [docs/architecture.md](docs/architecture.md)；
+RK3506 板端部署调试排查手册见 [docs/board-bringup-runbook.md](docs/board-bringup-runbook.md)。
 
 ## 许可证
 
