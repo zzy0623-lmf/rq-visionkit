@@ -46,7 +46,7 @@ pytest tests/ annotator/tests converter/tests deployer/tests runtime/pc_sim/test
 六步主流程（采集→标注→训练→转换→部署→推理查看）的端到端复现记录见
 [docs/e2e-run.md](docs/e2e-run.md)；性能基线见 [docs/baselines.md](docs/baselines.md)；
 系统架构见 [docs/architecture.md](docs/architecture.md)；
-项目完成流程见 [docs/project-workflow.md](docs/project-workflow.md)；
+项目完成流程见 [.trae/skills/rq-visionkit-workflow/SKILL.md](.trae/skills/rq-visionkit-workflow/SKILL.md)；
 RK3506 板端部署调试排查手册见 [docs/board-bringup-runbook.md](docs/board-bringup-runbook.md)。
 
 ## 许可证
