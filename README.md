@@ -55,6 +55,6 @@ RK3506 板端部署调试排查手册见 [docs/board-bringup-runbook.md](docs/bo
 
 ## 参赛说明
 
-- 与在投稿论文的成果复用关系：见 [docs/relation-to-paper.md](docs/relation-to-paper.md)
+- 与已录用论文（AMEM 2026，EI Compendex 检索）的成果复用关系：见 [docs/relation-to-paper.md](docs/relation-to-paper.md)
 - 贡献指南：[CONTRIBUTING.md](CONTRIBUTING.md)
 - 变更记录：[CHANGELOG.md](CHANGELOG.md)
