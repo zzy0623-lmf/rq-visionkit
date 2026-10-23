@@ -32,8 +32,7 @@ M4 运行时新增 `task=classify` 分支，支持分类模型：
 
 ## 完整源代码（RK3588）
 
-以下为论文/软著所述「嵌入式AI视觉机械臂智能分拣系统」的完整源码，从软著 PDF 还原（因软著登记
-只提交「前30页+后30页」，部分模块有缺失，已在下述文件内注释标明）：
+以下为论文/软著所述「嵌入式AI视觉机械臂智能分拣系统」的完整源码，从软著 PDF 还原：
 
 | 文件 | 说明 |
 | --- | --- |
@@ -44,14 +43,18 @@ M4 运行时新增 `task=classify` 分支，支持分类模型：
 | `ik_solver.py` | 四自由度机械臂几何法逆运动学 |
 | `servo_controller.py` | 舵机控制（⚠️ 方法体在 PDF 中被截断） |
 | `config.py` | 系统配置（⚠️ 类声明与 __init__ 在 PDF 中缺失） |
+| `calibration.py` | 相机标定 / 四点透视变换（重构） |
+| `hal.py` | 硬件抽象层：摄像头 + PCA9685（重构） |
 | `logger.py` | 日志管理（单例） |
 | `utils.py` | 通用工具（数学/坐标/图像/计时/线程安全） |
 | `train.py` | 模型训练 + INT8 量化 + 数据采集 |
 | `setup.sh` | 香橙派5 一键部署脚本 |
 | `requirements.txt` | Python 运行依赖 |
 
-> 缺失说明：`calibration.py`（相机标定）、`hal.py`（硬件抽象层）两个模块因处于软著 PDF 中段
-> 被截断，未包含在本仓库；其接口说明见《软著设计说明书》第 6 章，完整实现可向作者索取。
+> 缺失说明：`servo_controller.py`（ServoController 方法体）与 `config.py`（class Config 声明
+> 及 __init__）因处于软著 PDF 的「前30页+后30页」之间的被截断段，已尽力还原但仍不完整；
+> `calibration.py`、`hal.py` 为**依据《软著设计说明书》接口描述 + 调用点重构**（非原始代码，
+> 各文件头已注明）。完整原始实现如有需要可向作者索取。
 
 ## 目录内容
 
@@ -59,7 +62,8 @@ M4 运行时新增 `task=classify` 分支，支持分类模型：
 demo/sorting_arm/
 ├── main.py / sorting_controller.py / vision.py   # RK3588 分拣系统源码（软著PDF还原）
 ├── classifier.py / ik_solver.py / servo_controller.py / config.py
-├── logger.py / utils.py / train.py / setup.sh / requirements.txt
+├── calibration.py / hal.py / logger.py / utils.py / train.py
+├── setup.sh / requirements.txt
 └── model/                # T1.6 论文 MobileNetV2（五分类）转换产物
     ├── report.json       # 转换报告（onnxsim → pnnx → ncnnoptimize，FP32 8.78MB）
     ├── paper_mobilenetv2.sim_pnnx.py   # pnnx 生成的推理脚本
