@@ -4,7 +4,7 @@
 
 参赛者已有一篇**已录用**论文《Design and Implementation of an Embedded AI Vision-Based
 Robotic Arm Intelligent Sorting System》（AMEM 2026，武汉，2026 年 12 月 11–13 日，
-发表 + 口头报告，将提交 EI Compendex 检索），其中包含：
+发表 + 口头报告，已被 EI Compendex 检索），其中包含：
 
 1. **训练好的 MobileNetV2 五分类模型**（TFLite INT8 格式）——在本项目中作为
    RQ-VisionKit 工具链的**第一个真实适配对象**（T1.6）：从训练框架重新导出 ONNX，
@@ -24,5 +24,5 @@ RQ-VisionKit 的全部代码——采集标注工具（M1）、模型适配转�
   工具链本身不依赖该论文的任何私有实现。
 - 比赛提交材料中引用论文性能数据（如 RK3588 数据）时，会明确标注来源并说明
   与 RK3506 实测数据的差异来源（RK3506 无 NPU）。
-- 论文已获 AMEM 2026 录用（发表 + 口头报告，将提交 EI Compendex 检索）。如与赛事规则
+- 论文已获 AMEM 2026 录用（发表 + 口头报告，已被 EI Compendex 检索）。如与赛事规则
   存在冲突，以赛事组委会裁定为准，必要时移除扩展 Demo 相关内容。
