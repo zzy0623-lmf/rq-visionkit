@@ -89,7 +89,7 @@ RQ-VisionKit 补齐这条链路，让**自定义视觉模型不写代码即可�
 参赛者已有一篇**已录用**论文《Design and Implementation of an Embedded AI Vision-Based
 Robotic Arm Intelligent Sorting System》（机械臂智能分拣系统），已被 **AMEM 2026**
 （2026 年第 5 届先进材料与装备制造国际会议，武汉，2026 年 12 月 11–13 日）录用为
-**发表 + 口头报告**（Paper ID: A20261012372804），并将提交 **EI Compendex** 检索。
+**发表 + 口头报告**，并已被 **EI Compendex** 检索。
 本项目与论文的关系：
 
 - **复用**：论文训练好的模型与机械臂算法仅作为**被适配/被部署对象**，用于验证工具链能力。
