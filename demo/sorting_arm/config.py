@@ -1,7 +1,15 @@
 # ============================================================
-# config.py - 系统配置模块（从《软著鉴别材料·源代码》PDF 还原）
-# 注意：本文件类声明（class Config:）与 __init__ 方法在 PDF 中缺失，
-# 以下内容为 Config 类的默认配置字典、方法与 get_config 单例函数。
+# config.py - 系统配置模块（重构版）
+# 基于嵌入式AI视觉的机械臂智能分拣系统
+#
+# 【重要说明】本文件为「重构代码」，非《软著鉴别材料·源代码》PDF 中的原始代码。
+# 原始 config.py 的类声明（class Config:）、__init__ 与 _get_default_config 头部
+# 位于软著 PDF 的「前30页+后30页」之间的被截断段，故缺失。
+# 本实现依据以下证据重构，未凭空捏造配置项：
+#   1) 《软著设计说明书》第 2.2/3.1/4.1/6.7 节：硬件清单、关节参数、术语与关键数据结构；
+#   2) ik_solver.py / vision.py / classifier.py / sorting_controller.py / train.py / hal.py
+#      中对各配置键的实际读取（如 kinematics.link_lengths_mm、hardware.servos.* 等）；
+#   3) 软著 PDF 中已还原出的配置字典尾部（vision/ai_model/sorting/logging/performance）。
 # ============================================================
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
@@ -10,6 +18,62 @@ import json
 import copy
 from typing import Any, Dict, Optional
 
+
+class Config:
+    """
+    系统配置类
+    提供默认配置、从 JSON 文件加载/合并、按点分路径读写、参数校验等功能。
+    各模块通过 get_config() 获取全局单例，或通过 Config(config_path) 构建实例。
+    """
+    def __init__(self, config_path: Optional[str] = None):
+        self._config = self._get_default_config()
+        if config_path and os.path.exists(config_path):
+            if not self.load_from_file(config_path):
+                print(f"[Config] 配置文件加载失败，使用默认配置: {config_path}")
+
+    def _get_default_config(self) -> Dict:
+        """返回系统默认配置字典。"""
+        return {
+            # ==================== 系统信息 ====================
+            "system": {
+                "version": "V1.0",
+                "author": "赵喆远",
+            },
+            # ==================== 硬件配置 ====================
+            "hardware": {
+                "camera": {
+                    "device_id": 0,
+                    "width": 1280,
+                    "height": 720,
+                    "fps": 30,
+                },
+                "servos": {
+                    "J1": {"min_angle_deg": 0, "max_angle_deg": 180},
+                    "J2": {"min_angle_deg": 20, "max_angle_deg": 160},
+                    "J3": {"min_angle_deg": -150, "max_angle_deg": 0},
+                    "J4": {"min_angle_deg": -30, "max_angle_deg": 60},
+                },
+                "pca9685": {
+                    "bus": 1,
+                    "address": 0x40,
+                    "pwm_freq_hz": 50,
+                },
+            },
+            # ==================== 运动学配置 ====================
+            "kinematics": {
+                "link_lengths_mm": {
+                    "L1_base_height": 45.0,
+                    "L2_shoulder_to_elbow": 80.0,
+                    "L3_elbow_to_wrist": 110.0,
+                    "L4_wrist_to_tip": 60.0,
+                },
+                "joint_limits_deg": {
+                    "J1": [0, 180],
+                    "J2": [20, 160],
+                    "J3": [-150, 0],
+                    "J4": [-30, 60],
+                },
+                "workspace_mm": {
                     "x_min": -150,
                     "x_max": 150,
                     "y_min": -150,
@@ -65,7 +129,6 @@ from typing import Any, Dict, Optional
                     "multi_object_enabled": False,
                     "max_objects": 5,
                     "sort_by": "area",
-
                     "sort_order": "descending",
                 },
                 "coordinate_mapping": {
@@ -121,7 +184,6 @@ from typing import Any, Dict, Optional
                     "adam_epsilon": 1e-8,
                     "loss_function": "categorical_crossentropy",
                     "metrics": ["accuracy", "top_k_categorical_accuracy"],
-
                     "lr_scheduler": "cosine_annealing",
                     "warmup_epochs": 2,
                     "weight_decay": 0.0001,
@@ -177,7 +239,6 @@ from typing import Any, Dict, Optional
                 "gripper_open_delay_seconds": 0.3,
                 "settle_delay_seconds": 0.3,
                 "state_machine": {
-
                     "states": [
                         "IDLE",
                         "CAPTURE",
@@ -232,7 +293,6 @@ from typing import Any, Dict, Optional
                 "track_memory": True,
                 "memory_interval_seconds": 10,
                 "track_cpu": True,
-
                 "cpu_interval_seconds": 5,
                 "track_temperature": True,
                 "temperature_interval_seconds": 30,
@@ -244,6 +304,7 @@ from typing import Any, Dict, Optional
                 },
             },
         }
+
     def load_from_file(self, config_path: str) -> bool:
         """从JSON配置文件加载配置"""
         try:
@@ -254,6 +315,7 @@ from typing import Any, Dict, Optional
         except (json.JSONDecodeError, IOError) as e:
             print(f"[Config] 加载配置文件失败: {e}")
             return False
+
     def _merge_config(self, base: Dict, override: Dict) -> None:
         """递归合并配置字典"""
         for key, value in override.items():
@@ -261,6 +323,7 @@ from typing import Any, Dict, Optional
                 self._merge_config(base[key], value)
             else:
                 base[key] = value
+
     def save_to_file(self, config_path: str) -> bool:
         """保存当前配置到JSON文件"""
         try:
@@ -271,6 +334,7 @@ from typing import Any, Dict, Optional
         except IOError as e:
             print(f"[Config] 保存配置文件失败: {e}")
             return False
+
     def get(self, key_path: str, default: Any = None) -> Any:
         """按点分路径获取配置值"""
         keys = key_path.split('.')
@@ -281,9 +345,9 @@ from typing import Any, Dict, Optional
             else:
                 return default
         return value
+
     def set(self, key_path: str, value: Any) -> bool:
         """按点分路径设置配置值"""
-
         keys = key_path.split('.')
         config = self._config
         for key in keys[:-1]:
@@ -292,9 +356,11 @@ from typing import Any, Dict, Optional
             config = config[key]
         config[keys[-1]] = value
         return True
+
     def get_section(self, section: str) -> Optional[Dict]:
         """获取整个配置节"""
         return self._config.get(section)
+
     def validate(self) -> Dict[str, str]:
         """校验配置参数的合法性"""
         errors = {}
@@ -324,19 +390,23 @@ from typing import Any, Dict, Optional
         if conf_thresh is not None and (conf_thresh < 0 or conf_thresh > 1):
             errors["ai_model.classifier.confidence_threshold"] = "置信度阈值必须在0到1之间"
         return errors
+
     def export_for_logging(self) -> Dict:
         """导出用于日志记录的配置摘要（隐藏敏感信息）"""
         summary = copy.deepcopy(self._config)
         # 移除可能包含敏感信息的字段
         if "system" in summary:
-
             summary["system"].pop("author", None)
         return summary
+
     def reset_to_default(self) -> None:
         """重置为默认配置"""
         self._config = self._get_default_config()
+
     def __repr__(self) -> str:
         return f"Config(version={self.get('system.version')}, sections={list(self._config.keys())})"
+
+
 def get_config(config_path: Optional[str] = None) -> Config:
     """获取全局配置单例"""
     return Config(config_path)
