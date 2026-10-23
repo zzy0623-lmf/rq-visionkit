@@ -16,7 +16,8 @@ RQ-VisionKit 补齐这条链路，让自定义视觉模型不写代码即可在 
 | `converter/` | M2 模型适配与一键转换（ONNX → NCNN INT8，含算子兼容扫描） |
 | `deployer/` | M3 低代码部署控制台 |
 | `runtime/` | M4 端侧推理运行时（`pc_sim/` PC 仿真版，`board/` RK3506 板端版） |
-| `demo/` | 主 Demo：NEU-DET 钢材表面缺陷检测；扩展 Demo：机械臂分拣 |
+| `demo/` | 主 Demo：NEU-DET 钢材表面缺陷检测 |
+| `sorting_arm/` | 扩展 Demo：机械臂智能分拣系统完整源码（RK3588，从软著 PDF 还原） |
 | `scripts/` | 训练、基准测试等脚本 |
 | `docs/` | 架构、许可证清单、性能基线、路线图、项目流程、板端部署调试手册 |
 
