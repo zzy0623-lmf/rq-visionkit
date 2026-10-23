@@ -3,6 +3,11 @@
 RQ-VisionKit 扩展 Demo：把论文的 MobileNetV2 分类模型经工具链转换、部署后，驱动机械臂分拣
 5 类物品。任务书 T2.5，时间盒 ≤4 天，超期或受阻即降级。
 
+> **补充（2026-10-23）**：本目录现已补充从《软著鉴别材料·源代码》PDF 还原的完整机械臂分拣系统
+> 源代码（RK3588 / TensorFlow Lite / PCA9685 版本），即论文与软件著作权所述系统的原始实现，
+> 详见下方「完整源代码（RK3588）」。注意：它与 RQ-VisionKit 的 RK3506 工具链 Demo 属两个平台，
+> 前者为 TFLite INT8 + XNNPACK，后者为 NCNN + RT-Thread。
+
 ## 当前状态（降级为「分类识别 + 结果显示」）
 
 按任务书 T2.5 的降级条款，本 Demo 已裁剪为**分类识别 + 结果显示**，不做机械臂抓取：
@@ -25,10 +30,36 @@ M4 运行时新增 `task=classify` 分支，支持分类模型：
 验证结果（PC 仿真）：`crazing` 缺陷图 → top-1 `crazing`（score 0.9975），单帧 9.0ms。
 详见 [docs/baselines.md](../docs/baselines.md) 的 T2.5 记录。
 
+## 完整源代码（RK3588）
+
+以下为论文/软著所述「嵌入式AI视觉机械臂智能分拣系统」的完整源码，从软著 PDF 还原（因软著登记
+只提交「前30页+后30页」，部分模块有缺失，已在下述文件内注释标明）：
+
+| 文件 | 说明 |
+| --- | --- |
+| `main.py` | 系统主程序入口（CLI、标定、单次/自动分拣、性能测试） |
+| `sorting_controller.py` | 分拣主控编排（有限状态机 + 统计） |
+| `vision.py` | 视觉处理（HSV 背景分割、轮廓定位） |
+| `classifier.py` | MobileNetV2 INT8 分类推理（TFLite） |
+| `ik_solver.py` | 四自由度机械臂几何法逆运动学 |
+| `servo_controller.py` | 舵机控制（⚠️ 方法体在 PDF 中被截断） |
+| `config.py` | 系统配置（⚠️ 类声明与 __init__ 在 PDF 中缺失） |
+| `logger.py` | 日志管理（单例） |
+| `utils.py` | 通用工具（数学/坐标/图像/计时/线程安全） |
+| `train.py` | 模型训练 + INT8 量化 + 数据采集 |
+| `setup.sh` | 香橙派5 一键部署脚本 |
+| `requirements.txt` | Python 运行依赖 |
+
+> 缺失说明：`calibration.py`（相机标定）、`hal.py`（硬件抽象层）两个模块因处于软著 PDF 中段
+> 被截断，未包含在本仓库；其接口说明见《软著设计说明书》第 6 章，完整实现可向作者索取。
+
 ## 目录内容
 
 ```
 demo/sorting_arm/
+├── main.py / sorting_controller.py / vision.py   # RK3588 分拣系统源码（软著PDF还原）
+├── classifier.py / ik_solver.py / servo_controller.py / config.py
+├── logger.py / utils.py / train.py / setup.sh / requirements.txt
 └── model/                # T1.6 论文 MobileNetV2（五分类）转换产物
     ├── report.json       # 转换报告（onnxsim → pnnx → ncnnoptimize，FP32 8.78MB）
     ├── paper_mobilenetv2.sim_pnnx.py   # pnnx 生成的推理脚本
