@@ -41,8 +41,8 @@ M4 运行时新增 `task=classify` 分支，支持分类模型：
 | `vision.py` | 视觉处理（HSV 背景分割、轮廓定位） |
 | `classifier.py` | MobileNetV2 INT8 分类推理（TFLite） |
 | `ik_solver.py` | 四自由度机械臂几何法逆运动学 |
-| `servo_controller.py` | 舵机控制（⚠️ 方法体在 PDF 中被截断） |
-| `config.py` | 系统配置（⚠️ 类声明与 __init__ 在 PDF 中缺失） |
+| `servo_controller.py` | 舵机控制（重构） |
+| `config.py` | 系统配置（重构） |
 | `calibration.py` | 相机标定 / 四点透视变换（重构） |
 | `hal.py` | 硬件抽象层：摄像头 + PCA9685（重构） |
 | `logger.py` | 日志管理（单例） |
@@ -51,10 +51,9 @@ M4 运行时新增 `task=classify` 分支，支持分类模型：
 | `setup.sh` | 香橙派5 一键部署脚本 |
 | `requirements.txt` | Python 运行依赖 |
 
-> 缺失说明：`servo_controller.py`（ServoController 方法体）与 `config.py`（class Config 声明
-> 及 __init__）因处于软著 PDF 的「前30页+后30页」之间的被截断段，已尽力还原但仍不完整；
-> `calibration.py`、`hal.py` 为**依据《软著设计说明书》接口描述 + 调用点重构**（非原始代码，
-> 各文件头已注明）。完整原始实现如有需要可向作者索取。
+> 重构说明：`config.py`、`servo_controller.py`、`calibration.py`、`hal.py` 四个模块因处于软著 PDF 的
+> 「前30页+后30页」之间的被截断段而缺失，已**依据《软著设计说明书》接口描述 + 现有代码调用点重构**
+> （非原始代码，各文件头已注明重构依据）。完整原始实现如有需要可向作者索取。
 
 ## 目录内容
 
